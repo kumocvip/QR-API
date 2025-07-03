@@ -1,0 +1,24 @@
+body {
+  font-family: sans-serif;
+  background: #f7f9fc;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  padding: 20px;
+  max-width: 400px;
+  margin: auto;
+  text-align: center;
+}
+h2 {
+  color: #333;
+}
+#reader {
+  width: 100%;
+  margin: 10px 0;
+}
+.result {
+  margin-top: 10px;
+  color: green;
+  font-weight: bold;
+}

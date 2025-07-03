@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scan QR → Gửi API</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Quét mã QR</h2>
+    <div id="reader"></div>
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    function sendToAPI(qrData) {
+      fetch("/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ qr: qrData })
+      }).then(res => {
+        document.getElementById("result").innerText = "✅ Đã gửi: " + qrData;
+      });
+    }
+
+    const qrScanner = new Html5Qrcode("reader");
+    qrScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      (decodedText, _) => {
+        qrScanner.stop();
+        sendToAPI(decodedText);
+      }
+    );
+  </script>
+</body>
+</html>
