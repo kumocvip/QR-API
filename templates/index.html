@@ -4,36 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Scan QR → Gửi API</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"></script>
   <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"></script>
 </head>
 <body>
   <div class="container">
     <h2>Quét mã QR</h2>
-    <div id="reader"></div>
+    <button id="scan-btn">📷 Bấm để Quét QR</button>
+    <div id="reader" style="width:100%; margin-top: 20px; display: none;"></div>
     <div id="result" class="result"></div>
   </div>
 
   <script>
-    function sendToAPI(qrData) {
-      fetch("/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qr: qrData })
-      }).then(res => {
-        document.getElementById("result").innerText = "✅ Đã gửi: " + qrData;
-      });
-    }
+    document.getElementById("scan-btn").addEventListener("click", function() {
+      const btn = this;
+      btn.disabled = true;
+      btn.innerText = "🔄 Đang khởi động camera...";
 
-    const qrScanner = new Html5Qrcode("reader");
-    qrScanner.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      (decodedText, _) => {
-        qrScanner.stop();
-        sendToAPI(decodedText);
-      }
-    );
+      const qrScanner = new Html5Qrcode("reader");
+      document.getElementById("reader").style.display = "block";
+
+      qrScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText, _) => {
+          qrScanner.stop();
+          fetch("/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ qr: decodedText })
+          }).then(res => {
+            document.getElementById("result").innerText = "✅ Đã gửi: " + decodedText;
+            btn.disabled = false;
+            btn.innerText = "📷 Quét lại";
+            document.getElementById("reader").style.display = "none";
+          });
+        }
+      ).catch(err => {
+        document.getElementById("result").innerText = "❌ Lỗi mở camera: " + err;
+        btn.disabled = false;
+        btn.innerText = "📷 Bấm để Quét QR";
+      });
+    });
   </script>
 </body>
 </html>
